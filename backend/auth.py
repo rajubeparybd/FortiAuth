@@ -378,7 +378,8 @@ def forgot_password():
     user = execute_query(_db_path(), "SELECT id, username FROM users WHERE email = ?", (email,), fetchone=True)
     # Do not reveal whether an account exists.
     if not user:
-        return jsonify({"message": "If the account exists, reset instructions have been generated."})
+        print(f"[Password Recovery Debug] email={email} reset_token=<not-generated:user-not-found>", flush=True)
+        return _json_error("User not found. Please enter a registered email.", 404)
     token = generate_reset_token()
     expires = (now_utc() + timedelta(hours=1)).isoformat()
     execute_query(
@@ -386,6 +387,7 @@ def forgot_password():
         "INSERT INTO password_reset_tokens (id, user_id, token, expires_at, used, created_at) VALUES (?, ?, ?, ?, 0, ?)",
         (str(uuid.uuid4()), user["id"], token, expires, now_utc().isoformat()),
     )
+    print(f"[Password Recovery Debug] email={email} reset_token={token}", flush=True)
     return jsonify(
         {
             "message": "If the account exists, reset instructions have been generated.",

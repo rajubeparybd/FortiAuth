@@ -35,6 +35,8 @@ form?.addEventListener("submit", async (event) => {
     statusText.textContent = data.error || "Registration failed.";
     return;
   }
+  form?.reset();
+  strengthText.textContent = "";
   statusText.textContent = "Registration successful. Redirecting to login...";
   setTimeout(() => {
     window.location.href = "/index.html";

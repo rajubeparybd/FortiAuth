@@ -121,6 +121,11 @@ loginForm?.addEventListener("submit", async (event) => {
       return;
     }
     localStorage.setItem("access_token", verifyData.access_token);
+    loginForm?.reset();
+    pendingUserId = "";
+    if (twoFactorBlock) {
+      twoFactorBlock.style.display = "none";
+    }
     setStatus("Login complete. Redirecting...", "success");
     window.redirectToDashboard();
     return;
@@ -150,6 +155,11 @@ loginForm?.addEventListener("submit", async (event) => {
 
   localStorage.setItem("access_token", data.access_token);
   clearLockoutUntil();
+  loginForm?.reset();
+  pendingUserId = "";
+  if (twoFactorBlock) {
+    twoFactorBlock.style.display = "none";
+  }
   setStatus("Login successful. Redirecting...", "success");
   window.redirectToDashboard();
 });
