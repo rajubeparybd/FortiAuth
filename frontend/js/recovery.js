@@ -40,7 +40,8 @@ forgotForm?.addEventListener("submit", async (event) => {
     return;
   }
   const token = data.mock_notification?.reset_token || "Check notification channel";
-  statusNode.textContent = `${data.message} Token: ${token}`;
+  console.log("[Password Recovery] Reset token:", token);
+  statusNode.textContent = `${data.message} Check browser console for debug reset token.`;
   showResetState();
   const tokenInput = document.getElementById("token");
   tokenInput?.focus();

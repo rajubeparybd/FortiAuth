@@ -26,6 +26,12 @@
 
       <button type="submit">Sign In</button>
     </form>
+    <section id="lockoutPanel" class="card" style="display: none">
+      <h3>Account Temporarily Locked</h3>
+      <p class="status status-error">Too many failed login attempts.</p>
+      <p id="lockoutTimerText" class="status"></p>
+      <p class="hint">Please wait for the timer to finish before trying again.</p>
+    </section>
     <p id="status" class="status"></p>
     <div class="links">
       <a href="/register.html">Create account</a>

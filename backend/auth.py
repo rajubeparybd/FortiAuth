@@ -1,6 +1,6 @@
 import json
 import uuid
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 from flask import Blueprint, current_app, jsonify, make_response, request
@@ -62,6 +62,43 @@ def _store_login_attempt(user_id: str | None, success: bool) -> None:
     )
 
 
+def _ip_lockout_remaining_seconds(ip_address: str) -> int:
+    max_failed_attempts = current_app.config["MAX_FAILED_ATTEMPTS"]
+    lockout_seconds = current_app.config["LOCKOUT_MINUTES"] * 60
+    recent_attempts = execute_query(
+        _db_path(),
+        """
+        SELECT success, attempted_at FROM login_attempts
+        WHERE ip_address = ?
+        ORDER BY attempted_at DESC
+        LIMIT ?
+        """,
+        (ip_address, max_failed_attempts),
+        fetchall=True,
+    ) or []
+    if len(recent_attempts) < max_failed_attempts:
+        return 0
+
+    has_success = any(int(attempt["success"]) == 1 for attempt in recent_attempts)
+    if has_success:
+        return 0
+
+    oldest_failed_attempt = recent_attempts[-1]
+    first_failure_time = datetime.fromisoformat(oldest_failed_attempt["attempted_at"])
+    elapsed = int((now_utc() - first_failure_time).total_seconds())
+    return max(0, lockout_seconds - elapsed)
+
+
+def _lockout_remaining_seconds(locked_until: str | None) -> int:
+    if not locked_until:
+        return 0
+    try:
+        remaining = datetime.fromisoformat(locked_until) - now_utc()
+    except ValueError:
+        return 0
+    return max(0, int(remaining.total_seconds()))
+
+
 @auth_blueprint.get("/csrf-token")
 def csrf_token():
     session_key = request.remote_addr or "anonymous"
@@ -116,6 +153,19 @@ def login():
     payload = _request_json()
     username = str(payload.get("username", "")).strip()
     password = str(payload.get("password", ""))
+    client_ip = request.remote_addr or "unknown"
+
+    ip_remaining_seconds = _ip_lockout_remaining_seconds(client_ip)
+    if ip_remaining_seconds > 0:
+        return (
+            jsonify(
+                {
+                    "error": "Too many failed attempts. Login is blocked temporarily.",
+                    "retry_after_seconds": ip_remaining_seconds,
+                }
+            ),
+            423,
+        )
 
     user = execute_query(
         _db_path(),
@@ -125,11 +175,41 @@ def login():
     )
     if not user:
         _store_login_attempt(None, False)
+        unknown_user_ip_remaining_seconds = _ip_lockout_remaining_seconds(client_ip)
+        if unknown_user_ip_remaining_seconds > 0:
+            return (
+                jsonify(
+                    {
+                        "error": "Too many failed attempts. Login is blocked temporarily.",
+                        "retry_after_seconds": unknown_user_ip_remaining_seconds,
+                    }
+                ),
+                423,
+            )
         return _json_error("Invalid username or password.", 401)
 
     if not is_lockout_expired(user.get("locked_until")):
+        remaining_seconds = _lockout_remaining_seconds(user.get("locked_until"))
         _store_login_attempt(user["id"], False)
-        return _json_error("Account is temporarily locked due to failed attempts.", 423)
+        return (
+            jsonify(
+                {
+                    "error": "Account is temporarily locked due to failed attempts.",
+                    "retry_after_seconds": remaining_seconds,
+                }
+            ),
+            423,
+        )
+
+    # Lockout window has passed; clear stale lockout/attempt counters.
+    if user.get("locked_until") or int(user.get("failed_login_attempts", 0)) >= current_app.config["MAX_FAILED_ATTEMPTS"]:
+        execute_query(
+            _db_path(),
+            "UPDATE users SET failed_login_attempts = 0, locked_until = NULL, updated_at = ? WHERE id = ?",
+            (now_utc().isoformat(), user["id"]),
+        )
+        user["failed_login_attempts"] = 0
+        user["locked_until"] = None
 
     if not verify_password(password, user["password_hash"]):
         failed_attempts = int(user["failed_login_attempts"]) + 1
@@ -140,6 +220,28 @@ def login():
             (failed_attempts, locked_until, now_utc().isoformat(), user["id"]),
         )
         _store_login_attempt(user["id"], False)
+        ip_remaining_seconds = _ip_lockout_remaining_seconds(client_ip)
+        if ip_remaining_seconds > 0:
+            return (
+                jsonify(
+                    {
+                        "error": "Too many failed attempts. Login is blocked temporarily.",
+                        "retry_after_seconds": ip_remaining_seconds,
+                    }
+                ),
+                423,
+            )
+        if locked_until:
+            remaining_seconds = _lockout_remaining_seconds(locked_until)
+            return (
+                jsonify(
+                    {
+                        "error": "Account is temporarily locked due to failed attempts.",
+                        "retry_after_seconds": remaining_seconds,
+                    }
+                ),
+                423,
+            )
         return _json_error("Invalid username or password.", 401)
 
     execute_query(
@@ -155,6 +257,13 @@ def login():
     tokens = build_tokens(user["id"])
     _store_login_attempt(user["id"], True)
     return jsonify({"message": "Login successful.", "requires_2fa": False, **tokens})
+
+
+@auth_blueprint.get("/auth/lockout-status")
+def lockout_status():
+    client_ip = request.remote_addr or "unknown"
+    remaining_seconds = _ip_lockout_remaining_seconds(client_ip)
+    return jsonify({"retry_after_seconds": remaining_seconds})
 
 
 @auth_blueprint.post("/auth/verify-2fa")

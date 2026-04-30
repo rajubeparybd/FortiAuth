@@ -114,6 +114,24 @@ button:disabled {
   line-height: 1.45;
 }
 
+.status {
+  margin-top: 0.85rem;
+  min-height: 1.4rem;
+}
+
+.status-info {
+  color: #bfd0ff;
+}
+
+.status-success {
+  color: #67e8a5;
+}
+
+.status-error {
+  color: #ff4d6d !important;
+  font-weight: 600;
+}
+
 .links {
   margin-top: 1.2rem;
   display: flex;

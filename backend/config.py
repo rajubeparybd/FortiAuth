@@ -24,7 +24,7 @@ def load_config() -> AppConfig:
         database_path=os.getenv("DATABASE_PATH", "backend/login.db"),
         jwt_access_token_minutes=int(os.getenv("JWT_ACCESS_TOKEN_MINUTES", "15")),
         jwt_refresh_token_days=int(os.getenv("JWT_REFRESH_TOKEN_DAYS", "7")),
-        lockout_minutes=int(os.getenv("LOCKOUT_MINUTES", "15")),
+        lockout_minutes=int(os.getenv("LOCKOUT_MINUTES", "10")),
         max_failed_attempts=int(os.getenv("MAX_FAILED_ATTEMPTS", "3")),
         csrf_time_limit=None,
     )
