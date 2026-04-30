@@ -1,28 +1,7 @@
 const loginForm = document.getElementById("loginForm");
 const statusEl = document.getElementById("status");
 const twoFactorBlock = document.getElementById("twoFactorBlock");
-const linksEl = document.querySelector(".links");
 let pendingUserId = "";
-
-function renderLoggedInState(message) {
-  loginForm.style.display = "none";
-  if (linksEl) {
-    linksEl.style.display = "none";
-  }
-  statusEl.textContent = message;
-
-  let loggedInPanel = document.getElementById("loggedInPanel");
-  if (!loggedInPanel) {
-    loggedInPanel = document.createElement("div");
-    loggedInPanel.id = "loggedInPanel";
-    loggedInPanel.className = "links";
-    loggedInPanel.innerHTML = `
-      <a href="/2fa-setup.html">Set up 2FA</a>
-      <a href="/forgot-password.html">Change password</a>
-    `;
-    statusEl.insertAdjacentElement("afterend", loggedInPanel);
-  }
-}
 
 loginForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -42,7 +21,8 @@ loginForm?.addEventListener("submit", async (event) => {
       return;
     }
     localStorage.setItem("access_token", verifyData.access_token);
-    renderLoggedInState("Login complete with 2FA.");
+    statusEl.textContent = "Login complete. Redirecting...";
+    window.redirectToDashboard();
     return;
   }
 
@@ -64,5 +44,10 @@ loginForm?.addEventListener("submit", async (event) => {
   }
 
   localStorage.setItem("access_token", data.access_token);
-  renderLoggedInState("Login successful.");
+  statusEl.textContent = "Login successful. Redirecting...";
+  window.redirectToDashboard();
+});
+
+window.addEventListener("DOMContentLoaded", async () => {
+  await window.requireGuest();
 });

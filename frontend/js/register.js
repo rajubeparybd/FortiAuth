@@ -31,5 +31,16 @@ form?.addEventListener("submit", async (event) => {
     body: JSON.stringify({ username, email, password }),
   });
   const data = await response.json();
-  statusText.textContent = response.ok ? data.message : data.error || "Registration failed.";
+  if (!response.ok) {
+    statusText.textContent = data.error || "Registration failed.";
+    return;
+  }
+  statusText.textContent = "Registration successful. Redirecting to login...";
+  setTimeout(() => {
+    window.location.href = "/index.html";
+  }, 900);
+});
+
+window.addEventListener("DOMContentLoaded", async () => {
+  await window.requireGuest();
 });

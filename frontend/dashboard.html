@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body>
+  <main class="container">
+    <h1>Security Dashboard</h1>
+    <p class="hint">Manage your account security and authentication settings.</p>
+    <section class="card">
+      <p><strong>Username:</strong> <span id="usernameValue">-</span></p>
+      <p><strong>Email:</strong> <span id="emailValue">-</span></p>
+      <p><strong>2FA Status:</strong> <span id="twoFaValue">-</span></p>
+      <p><strong>Member Since:</strong> <span id="createdAtValue">-</span></p>
+    </section>
+    <div class="links dashboard-links">
+      <a href="/2fa-setup.html">Manage 2FA</a>
+      <a href="#" id="logoutLink">Logout</a>
+    </div>
+    <p id="status" class="status"></p>
+  </main>
+  <script src="/js/security.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+
+</html>

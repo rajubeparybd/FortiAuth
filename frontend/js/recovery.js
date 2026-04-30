@@ -1,6 +1,31 @@
 const forgotForm = document.getElementById("forgotForm");
 const resetForm = document.getElementById("resetForm");
+const resetDivider = document.getElementById("resetDivider");
 const statusNode = document.getElementById("status");
+
+function showRequestState() {
+  if (forgotForm) {
+    forgotForm.style.display = "block";
+  }
+  if (resetDivider) {
+    resetDivider.style.display = "none";
+  }
+  if (resetForm) {
+    resetForm.style.display = "none";
+  }
+}
+
+function showResetState() {
+  if (forgotForm) {
+    forgotForm.style.display = "none";
+  }
+  if (resetDivider) {
+    resetDivider.style.display = "block";
+  }
+  if (resetForm) {
+    resetForm.style.display = "block";
+  }
+}
 
 forgotForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -16,6 +41,9 @@ forgotForm?.addEventListener("submit", async (event) => {
   }
   const token = data.mock_notification?.reset_token || "Check notification channel";
   statusNode.textContent = `${data.message} Token: ${token}`;
+  showResetState();
+  const tokenInput = document.getElementById("token");
+  tokenInput?.focus();
 });
 
 resetForm?.addEventListener("submit", async (event) => {
@@ -28,4 +56,9 @@ resetForm?.addEventListener("submit", async (event) => {
   });
   const data = await response.json();
   statusNode.textContent = response.ok ? data.message : data.error || "Reset failed.";
+});
+
+window.addEventListener("DOMContentLoaded", async () => {
+  showRequestState();
+  await window.requireGuest();
 });

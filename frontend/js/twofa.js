@@ -9,7 +9,7 @@ const codeLabel = document.querySelector('label[for="code"]');
 let isTwoFactorEnabled = false;
 
 function authHeaders() {
-  return { Authorization: `Bearer ${localStorage.getItem("access_token") || ""}` };
+  return window.withAuthHeader();
 }
 
 function renderEnabledState(message) {
@@ -136,9 +136,14 @@ enableBtn?.addEventListener("click", async () => {
 });
 
 window.addEventListener("DOMContentLoaded", () => {
-  loadTwoFactorStatus().then((alreadyEnabled) => {
-    if (!alreadyEnabled) {
-      generateQrCode();
+  window.requireAuth().then((user) => {
+    if (!user) {
+      return;
     }
+    loadTwoFactorStatus().then((alreadyEnabled) => {
+      if (!alreadyEnabled) {
+        generateQrCode();
+      }
+    });
   });
 });
