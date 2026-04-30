@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Secure Login</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body>
+  <main class="container">
+    <h1>Secure Login</h1>
+    <p class="hint">Username/password + optional 2FA verification.</p>
+    <form id="loginForm">
+      <label for="username">Username</label>
+      <input id="username" name="username" required autocomplete="username" />
+
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" required autocomplete="current-password" />
+
+      <div id="twoFactorBlock" style="display: none">
+        <label for="code">2FA Code / Backup Code</label>
+        <input id="code" name="code" />
+      </div>
+
+      <button type="submit">Sign In</button>
+    </form>
+    <p id="status" class="status"></p>
+    <div class="links">
+      <a href="/register.html">Create account</a>
+      <a href="/forgot-password.html">Forgot password</a>
+    </div>
+  </main>
+  <script src="/js/security.js"></script>
+  <script src="/js/login.js"></script>
+</body>
+
+</html>

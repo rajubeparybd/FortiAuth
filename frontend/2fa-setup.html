@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2FA Setup</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body>
+  <main class="container">
+    <h1>Two-Factor Setup</h1>
+    <p class="hint">QR is generated automatically after page load. Verify one code to enable 2FA.</p>
+    <img id="qrImage" class="qr-image" alt="TOTP QR Code" />
+    <p id="secretText" class="hint"></p>
+    <label for="code">Verification code</label>
+    <input id="code" />
+    <button id="enableBtn" type="button">Enable 2FA</button>
+    <h3>Backup codes</h3>
+    <pre id="backupCodes"></pre>
+    <p id="status" class="status"></p>
+    <div class="links">
+      <a href="/index.html">Back to login</a>
+    </div>
+  </main>
+  <script src="/js/security.js"></script>
+  <script src="/js/twofa.js"></script>
+</body>
+
+</html>

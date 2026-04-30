@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body>
+  <main class="container">
+    <h1>Create account</h1>
+    <form id="registerForm">
+      <label for="username">Username</label>
+      <input id="username" name="username" required />
+
+      <label for="email">Email</label>
+      <input id="email" type="email" name="email" required />
+
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" required />
+      <p class="hint">Use 8+ chars with uppercase, lowercase, number, and symbol.</p>
+      <p id="strength" class="status"></p>
+
+      <button type="submit">Register</button>
+    </form>
+    <p id="status" class="status"></p>
+    <div class="links">
+      <a href="/index.html">Back to login</a>
+      <a href="/2fa-setup.html">2FA setup</a>
+    </div>
+  </main>
+  <script src="/js/security.js"></script>
+  <script src="/js/register.js"></script>
+</body>
+
+</html>
